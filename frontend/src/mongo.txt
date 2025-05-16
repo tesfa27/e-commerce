@@ -1,0 +1,9 @@
+cluster
+username:tesfamarkos29
+pass:WXM6io0euIo46WJn
+
+Db
+user:tesfa
+pass:QUWIjdhWIUEndd
+
+mongodb+srv://tesfa:QUWIjdhWIUEndd@cluster0.2yrfllh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0

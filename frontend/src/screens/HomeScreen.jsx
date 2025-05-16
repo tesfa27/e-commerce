@@ -2,6 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Product from "../components/Product";
 import { Row, Col } from "react-bootstrap";
+import { Helmet } from "react-helmet-async";
+import LoadingBox from '../components/LoadingBox';
+import MessageBox from '../components/MessageBox';
 
 function HomeScreen() {
   const {
@@ -17,7 +20,7 @@ function HomeScreen() {
         ? response.data
         : response.data.products || [];
     },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    // staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     retry: 3, // Retry failed requests up to 3 times
   });
   return (
@@ -25,9 +28,9 @@ function HomeScreen() {
       <h1>Featured Products</h1>
       <div className="products">
         {isLoading ? (
-          <div>Loading...</div>
+            <LoadingBox />
         ) : error ? (
-          <div>Error loading products.</div>
+          <MessageBox variant="danger">{error}</MessageBox>
         ) : (
           <Row>
             {products.map((product) => (
