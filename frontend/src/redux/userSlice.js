@@ -29,6 +29,25 @@ export const signIn = createAsyncThunk(
   }
 );
 
+export const signUp = createAsyncThunk(
+  'user/signUp',
+  async ({ name, email, password }, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.post('/api/users/signup', {
+        name,
+        email,
+        password,
+      });
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      return data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || 'Could not create account'
+      );
+    }
+  }
+);
+
 // Async thunk for user sign-out
 export const signOut = createAsyncThunk(
   'user/signOut',
@@ -63,6 +82,18 @@ const userSlice = createSlice({
         }
       })
       .addCase(signIn.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
+      .addCase(signUp.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(signUp.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.userInfo = action.payload;
+        state.error = null;
+      })
+      .addCase(signUp.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
       })
