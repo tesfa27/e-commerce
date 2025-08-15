@@ -12,6 +12,16 @@ const initialState = {
       return [];
     }
   })(),
+  shippingAddress: (() => {
+    try {
+      const savedAddress = localStorage.getItem("shippingAddress");
+      return savedAddress ? JSON.parse(savedAddress) : {};
+    } catch (error) {
+      console.error("Failed to parse shippingAddress from localStorage:", error);
+      return {};
+    }
+  })(),
+  paymentMethod: localStorage.getItem("paymentMethod") || "",
   status: "idle", // idle | loading | succeeded | failed
   error: null, // Stores error messages
 };
@@ -106,6 +116,38 @@ const cartSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    // Save shipping address
+    saveShippingAddress: (state, action) => {
+      state.shippingAddress = action.payload;
+      try {
+        localStorage.setItem("shippingAddress", JSON.stringify(action.payload));
+      } catch (error) {
+        console.error("Failed to save shippingAddress to localStorage:", error);
+      }
+    },
+    // Save payment method
+    savePaymentMethod: (state, action) => {
+      state.paymentMethod = action.payload;
+      localStorage.setItem("paymentMethod", action.payload);
+    },
+    // Clear entire cart
+    clearCart: (state) => {
+      console.log('Clearing cart...'); // Add debug log
+      state.cartItems = [];
+      state.shippingAddress = {};
+      state.paymentMethod = '';
+      state.error = null;
+      state.status = "idle";
+      try {
+        localStorage.removeItem("cartItems");
+        localStorage.removeItem("shippingAddress");
+        localStorage.removeItem("paymentMethod");
+        console.log('Cart cleared successfully'); // Add debug log
+      } catch (error) {
+        console.error("Failed to clear data from localStorage:", error);
+      }
+      console.log('New cart state:', state.cartItems); // Add debug log
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -135,5 +177,13 @@ const cartSlice = createSlice({
   },
 });
 
-export const { increaseQuantity, decreaseQuantity, deleteFromCart, clearError } = cartSlice.actions;
+export const { 
+  increaseQuantity, 
+  decreaseQuantity, 
+  deleteFromCart, 
+  clearError,
+  clearCart,
+  saveShippingAddress,
+  savePaymentMethod 
+} = cartSlice.actions;
 export default cartSlice.reducer;

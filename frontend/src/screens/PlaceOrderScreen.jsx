@@ -8,15 +8,15 @@ import { toast } from 'react-toastify';
 import CheckoutSteps from '../components/CheckoutSteps';
 import LoadingBox from '../components/LoadingBox';
 import { createOrder } from '../redux/orderSlice';
+import { clearCart } from '../redux/cartSlice';
+
 
 export default function PlaceOrderScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
   // Update selectors to get data from correct slices
-  const { cartItems } = useSelector((state) => state.cart);
-  const { shippingAddress } = useSelector((state) => state.shipping);
-  const { paymentMethod } = useSelector((state) => state.payment);
+  const { cartItems, shippingAddress, paymentMethod } = useSelector((state) => state.cart);
   
   
   const orderCreate = useSelector((state) => state.order);
@@ -35,19 +35,19 @@ export default function PlaceOrderScreen() {
       navigate('/signin');
       return;
     }
-    if (!shippingAddress || Object.keys(shippingAddress).length === 0) {
-      navigate('/shipping');
-      return;
-    }
-    if (!paymentMethod) {
-      navigate('/payment');
-      return;
-    }
-    // Only navigate if we have both success and a valid order with _id
+    // Remove these checks since we're about to place the order
+    // if (!shippingAddress || Object.keys(shippingAddress).length === 0) {
+    //   navigate('/shipping');
+    //   return;
+    // }
+    // if (!paymentMethod) {
+    //   navigate('/payment');
+    //   return;
+    // }
     if (success && order && order._id) {
       navigate(`/order/${order._id}`);
     }
-  }, [navigate, shippingAddress, paymentMethod, success, order, userInfo]);
+  }, [navigate, success, order, userInfo]);
 
   const placeOrderHandler = async () => {
     try {
@@ -61,10 +61,10 @@ export default function PlaceOrderScreen() {
         totalPrice,
       })).unwrap();
       
-      // Navigate only after successful order creation
       if (resultAction && resultAction.order && resultAction.order._id) {
         toast.success('Order placed successfully');
         navigate(`/order/${resultAction.order._id}`);
+        dispatch(clearCart()); // Move clearCart after navigation
       } else {
         toast.error('Invalid order response');
       }

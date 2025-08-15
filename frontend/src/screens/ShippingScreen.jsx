@@ -5,12 +5,13 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { Helmet } from 'react-helmet-async';
 import CheckoutSteps from '../components/CheckoutSteps';
+import { saveShippingAddress } from '../redux/cartSlice';
 
 const ShippingScreen = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { shippingAddress } = useSelector((state) => state.cart);
+  const { shippingAddress } = useSelector((state) => state.cart); // Changed from cart to shipping
 
   const [fullName, setFullName] = useState(shippingAddress?.fullName || '');
   const [address, setAddress] = useState(shippingAddress?.address || '');
@@ -20,26 +21,13 @@ const ShippingScreen = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch({
-      type: 'SAVE_SHIPPING_ADDRESS',
-      payload: {
-        fullName,
-        address,
-        city,
-        postalCode,
-        country,
-      },
-    });
-    localStorage.setItem(
-      'shippingAddress',
-      JSON.stringify({
-        fullName,
-        address,
-        city,
-        postalCode,
-        country,
-      })
-    );
+    dispatch(saveShippingAddress({
+      fullName,
+      address,
+      city,
+      postalCode,
+      country,
+    }));
     navigate('/payment');
   };
 

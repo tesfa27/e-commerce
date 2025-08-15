@@ -5,7 +5,8 @@ import dotenv from "dotenv";
 import seedRouter from "./routes/seedRoutes.js";
 import productRouter from "./routes/productRoutes.js";
 import userRouter from "./routes/userRoutes.js";
-import orderRouter from "./routes/orderRoutes.js"; // Add this import
+import orderRouter from "./routes/orderRoutes.js";
+import uploadRouter from "./routes/uploadRoutes.js";
 
 dotenv.config();
 mongoose
@@ -18,11 +19,17 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// PayPal client ID endpoint
+app.get('/api/keys/paypal', (req, res) => {
+  res.send(process.env.PAYPAL_CLIENT_ID || 'sb');
+});
+
 // Move error handler to after all routes
+app.use("/api/upload", uploadRouter);
 app.use("/api/users", userRouter);
 app.use("/api/seed", seedRouter);
 app.use("/api/products", productRouter);
-app.use("/api/orders", orderRouter); // Add order routes
+app.use("/api/orders", orderRouter);
 
 // Error handler should be last
 app.use((err, req, res, next) => {

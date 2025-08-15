@@ -4,14 +4,24 @@ import userReducer from './userSlice';
 import shippingReducer from './shippingSlice';
 import paymentReducer from './paymentSlice';
 import orderReducer from './orderSlice';
+import dashboardReducer from './dashboardSlice';
+import productListReducer from './productListSlice';
+import productEditReducer from './productEditSlice';
+import orderListReducer from './orderListSlice';
+import userListReducer from './userListSlice';
+import userEditReducer from './userEditSlice';
 
 export const store = configureStore({
   reducer: {
     cart: cartReducer,
     user: userReducer,
-    shipping: shippingReducer,
-    payment: paymentReducer,
     order: orderReducer,
+    dashboard: dashboardReducer,
+    productList: productListReducer,
+    productEdit: productEditReducer,
+    orderList: orderListReducer,
+    userList: userListReducer,
+    userEdit: userEditReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat((store) => (next) => (action) => {

@@ -3,15 +3,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button } from 'react-bootstrap';
 import { Helmet } from 'react-helmet-async';
-import { savePaymentMethod } from '../redux/paymentSlice';
+import { savePaymentMethod } from '../redux/cartSlice';
 import CheckoutSteps from '../components/CheckoutSteps';
 
 export default function PaymentMethodScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  const { shippingAddress } = useSelector((state) => state.shipping);
-  const { paymentMethod: savedPaymentMethod } = useSelector((state) => state.payment);
+  const { shippingAddress } = useSelector((state) => state.cart);
+  const { paymentMethod: savedPaymentMethod } = useSelector((state) => state.cart);
   
   // Initialize with saved payment method or default to PayPal
   const [paymentMethod, setPaymentMethod] = useState(
