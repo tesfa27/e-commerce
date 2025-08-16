@@ -7,8 +7,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      '/api': 'http://localhost:5000', // Replace 5000 with your Express port
+      '/api': 'http://localhost:5000',
     },
   },
-  
+  define: {
+    __API_URL__: JSON.stringify(process.env.VITE_API_URL || '/api')
+  }
 })
