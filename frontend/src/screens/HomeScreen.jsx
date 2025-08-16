@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { productAPI } from '../api';
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from 'react-router-dom';
 import LoadingBox from '../components/LoadingBox';
@@ -18,7 +18,7 @@ function HomeScreen() {
   } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const response = await axios.get("/api/products");
+      const response = await productAPI.getAll();
       return Array.isArray(response.data)
         ? response.data
         : response.data.products || [];

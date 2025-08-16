@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { Helmet } from 'react-helmet-async';
 import { XMarkIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
+import { productAPI } from '../api/index.js';
 
 import Rating from '../components/Rating';
 import LoadingBox from '../components/LoadingBox';
@@ -88,7 +89,7 @@ export default function ProductsScreen() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get('/api/products/categories');
+        const { data } = await productAPI.getCategories();
         setCategories(data);
       } catch (err) {
         toast.error(err.response?.data?.message || err.message);
