@@ -7,13 +7,8 @@ import { Nav, Container } from 'react-bootstrap';
 import { useSelector } from "react-redux";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
-import axios from 'axios';
+import { productAPI } from './api';
 import { getError } from './utils';
-
-// Configure axios base URL for production
-if (import.meta.env.VITE_API_URL) {
-  axios.defaults.baseURL = import.meta.env.VITE_API_URL;
-}
 import Header from "./components/Header";
 import HomeScreen from "./screens/HomeScreen";
 import ProductScreen from "./screens/ProductScreen";
@@ -48,7 +43,7 @@ const AppContent = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get('/api/products/categories');
+        const { data } = await productAPI.getCategories();
         setCategories(data);
       } catch (err) {
         toast.error(getError(err));

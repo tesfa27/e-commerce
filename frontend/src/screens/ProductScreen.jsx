@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-
-// Configure axios base URL
-const API_URL = import.meta.env.VITE_API_URL || '';
-axios.defaults.baseURL = API_URL;
+import { productAPI } from '../api';
 import { useSelector, useDispatch } from "react-redux";
 import { addToCart, clearError } from "../redux/cartSlice";
 import LoadingBox from "../components/LoadingBox";
@@ -37,7 +33,7 @@ function ProductScreen() {
     error: queryError,
   } = useQuery({
     queryKey: ["product", slug],
-    queryFn: async () => (await axios.get(`/api/products/slug/${slug}`)).data,
+    queryFn: async () => (await productAPI.getBySlug(slug)).data,
     retry: 3,
   });
 
@@ -71,11 +67,7 @@ function ProductScreen() {
     }
     try {
       setLoadingCreateReview(true);
-      await axios.post(
-        `/api/products/${product._id}/reviews`,
-        { rating, comment, name: userInfo.name },
-        { headers: { Authorization: `Bearer ${userInfo.token}` } }
-      );
+      await productAPI.createReview(product._id, { rating, comment, name: userInfo.name });
       setLoadingCreateReview(false);
       toast.success('Review submitted successfully');
       setRating(0);
