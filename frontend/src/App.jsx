@@ -39,18 +39,23 @@ import Footer from './components/Footer';
 const AppContent = () => {
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
+      if (categoriesLoaded) return;
+      
       try {
         const { data } = await productAPI.getCategories();
         setCategories(data);
+        setCategoriesLoaded(true);
       } catch (err) {
-        toast.error(getError(err));
+        console.error('Categories fetch error:', err);
+        setCategoriesLoaded(true);
       }
     };
     fetchCategories();
-  }, []);
+  }, [categoriesLoaded]);
 
   return (
     <BrowserRouter>

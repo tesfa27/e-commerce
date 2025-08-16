@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with backend URL
 const api = axios.create({
-  baseURL: 'https://ecomstore-78h6.onrender.com',
+  baseURL: import.meta.env.PROD ? 'https://ecomstore-78h6.onrender.com' : 'http://localhost:5000',
   timeout: 10000,
 });
 
