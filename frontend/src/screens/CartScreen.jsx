@@ -4,15 +4,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { increaseQuantity, decreaseQuantity, deleteFromCart, clearError } from "../redux/cartSlice";
 import MessageBox from "../components/MessageBox";
 import { Helmet } from "react-helmet-async";
-import { Row, Col, ListGroup, Card, Button, Spinner } from "react-bootstrap";
+import { colors, components, utils } from '../styles/theme';
+import { MinusIcon, PlusIcon, TrashIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
 
-// Shopping cart page component
 function CartScreen() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { cartItems, status, error } = useSelector((state) => state.cart);
 
-  // Clear error after 3 seconds
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => dispatch(clearError()), 3000);
@@ -20,19 +19,15 @@ function CartScreen() {
     }
   }, [error, dispatch]);
 
-  // Handlers for cart actions
   const increaseCartHandler = (item) => {
-    console.log("increaseCartHandler:", { item }); // Debug log
     dispatch(increaseQuantity(item));
   };
 
   const decreaseCartHandler = (item) => {
-    console.log("decreaseCartHandler:", { item }); // Debug log
     dispatch(decreaseQuantity(item));
   };
 
   const deleteCartHandler = (item) => {
-    console.log("deleteCartHandler:", { item }); // Debug log
     dispatch(deleteFromCart(item));
   };
 
@@ -40,97 +35,164 @@ function CartScreen() {
     navigate('/signin?redirect=/shipping');
   };
 
+  const subtotal = cartItems.reduce((a, c) => a + (c.price || 0) * c.quantity, 0);
+  const totalItems = cartItems.reduce((a, c) => a + c.quantity, 0);
+
   return (
-    <div>
+    <div className={`${colors.background.primary} min-h-screen`}>
       <Helmet>
-        <title>Shopping Cart</title>
+        <title>Shopping Cart - EcomStore</title>
       </Helmet>
-      <h1>Shopping Cart</h1>
-      {status === "loading" && <Spinner animation="border" size="sm" />}
-      {error && <MessageBox variant="danger">{error}</MessageBox>}
-      <Row>
-        <Col md={8}>
+      
+      <div className={components.layout.container}>
+        <div className="py-8">
+          <div className="flex items-center mb-8">
+            <ShoppingBagIcon className="w-8 h-8 text-emerald-600 mr-3" />
+            <h1 className={components.typography.h2}>Shopping Cart</h1>
+          </div>
+
+          {error && <MessageBox variant="danger">{error}</MessageBox>}
+
           {cartItems.length === 0 ? (
-            <MessageBox>
-              Cart is empty. <Link to="/">Go Shopping</Link>
-            </MessageBox>
+            <div className={`${components.card.base} p-12 ${utils.centerText}`}>
+              <ShoppingBagIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
+              <p className={`${colors.text.secondary} mb-6`}>Add some products to get started</p>
+              <Link 
+                to="/products"
+                className={components.button.primary}
+              >
+                Continue Shopping
+              </Link>
+            </div>
           ) : (
-            <ListGroup>
-              {cartItems.map((item) => (
-                <ListGroup.Item key={item._id}>
-                  <Row className="align-items-center">
-                    <Col md={4} className="d-flex align-items-center">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="img-fluid rounded img-thumbnail"
-                        style={{ maxWidth: "60px" }}
-                      />
-                      <Link to={`/product/${item.slug}`} className="ms-2">
-                        {item.name}
-                      </Link>
-                    </Col>
-                    <Col md={3}>
-                      <Button
-                        variant="light"
-                        onClick={() => decreaseCartHandler(item)}
-                        disabled={item.quantity === 1 || status === "loading"}
-                      >
-                        <i className="fas fa-minus-circle" />
-                      </Button>{" "}
-                      <span>{item.quantity}</span>{" "}
-                      <Button
-                        variant="light"
-                        onClick={() => increaseCartHandler(item)}
-                        disabled={item.quantity >= item.countInStock || status === "loading"}
-                      >
-                        <i className="fas fa-plus-circle" />
-                      </Button>
-                    </Col>
-                    <Col md={3}>${item.price?.toFixed(2)}</Col>
-                    <Col md={2}>
-                      <Button
-                        variant="light"
-                        onClick={() => deleteCartHandler(item)}
-                        disabled={status === "loading"}
-                      >
-                        <i className="fas fa-trash" />
-                      </Button>
-                    </Col>
-                  </Row>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
-          )}
-        </Col>
-        <Col md={4}>
-          <Card>
-            <Card.Body>
-              <ListGroup variant="flush">
-                <ListGroup.Item>
-                  <h3>
-                    Subtotal ({cartItems.reduce((a, c) => a + c.quantity, 0)} items) : $
-                    {cartItems
-                      .reduce((a, c) => a + (c.price || 0) * c.quantity, 0)
-                      .toFixed(2)}
-                  </h3>
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <div className="d-grid">
-                    <Button
-                      variant="primary"
-                      onClick={checkoutHandler}
-                      disabled={cartItems.length === 0 || status === "loading"}
-                    >
-                      Proceed to Checkout
-                    </Button>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Cart Items */}
+              <div className="lg:col-span-2">
+                <div className={`${components.card.base} overflow-hidden`}>
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Cart Items ({totalItems})
+                    </h3>
                   </div>
-                </ListGroup.Item>
-              </ListGroup>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+                  
+                  <div className="divide-y divide-gray-200">
+                    {cartItems.map((item) => (
+                      <div key={item._id} className="p-6">
+                        <div className="flex items-center space-x-4">
+                          {/* Product Image */}
+                          <div className="flex-shrink-0">
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                            />
+                          </div>
+                          
+                          {/* Product Info */}
+                          <div className="flex-1 min-w-0">
+                            <Link 
+                              to={`/product/${item.slug}`}
+                              className="text-lg font-medium text-gray-900 hover:text-emerald-600 transition-colors"
+                            >
+                              {item.name}
+                            </Link>
+                            <p className={`${colors.text.secondary} text-sm mt-1`}>
+                              Brand: {item.brand}
+                            </p>
+                            <p className="text-xl font-bold text-gray-900 mt-2">
+                              ${item.price?.toFixed(2)}
+                            </p>
+                          </div>
+                          
+                          {/* Quantity Controls */}
+                          <div className="flex items-center space-x-3">
+                            <button
+                              onClick={() => decreaseCartHandler(item)}
+                              disabled={item.quantity === 1 || status === "loading"}
+                              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <MinusIcon className="w-4 h-4" />
+                            </button>
+                            
+                            <span className="w-12 text-center font-medium">
+                              {item.quantity}
+                            </span>
+                            
+                            <button
+                              onClick={() => increaseCartHandler(item)}
+                              disabled={item.quantity >= item.countInStock || status === "loading"}
+                              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <PlusIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                          
+                          {/* Remove Button */}
+                          <button
+                            onClick={() => deleteCartHandler(item)}
+                            disabled={status === "loading"}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            <TrashIcon className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Summary */}
+              <div className="lg:col-span-1">
+                <div className={`${components.card.base} p-6 sticky top-24`}>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                    Order Summary
+                  </h3>
+                  
+                  <div className="space-y-4 mb-6">
+                    <div className="flex justify-between">
+                      <span className={colors.text.secondary}>Items ({totalItems})</span>
+                      <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className={colors.text.secondary}>Shipping</span>
+                      <span className="font-medium">Free</span>
+                    </div>
+                    
+                    <div className="border-t border-gray-200 pt-4">
+                      <div className="flex justify-between">
+                        <span className="text-lg font-semibold">Total</span>
+                        <span className="text-lg font-bold text-gray-900">
+                          ${subtotal.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button
+                    onClick={checkoutHandler}
+                    disabled={cartItems.length === 0 || status === "loading"}
+                    className={`${components.button.primary} w-full`}
+                  >
+                    {status === "loading" ? "Processing..." : "Proceed to Checkout"}
+                  </button>
+                  
+                  <div className={`${utils.centerText} mt-4`}>
+                    <Link 
+                      to="/products"
+                      className={`${colors.text.secondary} hover:text-emerald-600 text-sm transition-colors`}
+                    >
+                      Continue Shopping
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
