@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+
+// Configure axios base URL
+const API_URL = import.meta.env.VITE_API_URL || '';
+axios.defaults.baseURL = API_URL;
 import { useSelector, useDispatch } from "react-redux";
 import { addToCart, clearError } from "../redux/cartSlice";
 import LoadingBox from "../components/LoadingBox";

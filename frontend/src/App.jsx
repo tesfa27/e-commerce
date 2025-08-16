@@ -9,6 +9,11 @@ import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import axios from 'axios';
 import { getError } from './utils';
+
+// Configure axios base URL for production
+if (import.meta.env.VITE_API_URL) {
+  axios.defaults.baseURL = import.meta.env.VITE_API_URL;
+}
 import Header from "./components/Header";
 import HomeScreen from "./screens/HomeScreen";
 import ProductScreen from "./screens/ProductScreen";
