@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import data from "./data.js";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -16,6 +17,10 @@ mongoose
 
 const app = express();
 
+app.use(cors({
+  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

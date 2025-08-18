@@ -393,7 +393,7 @@ export default function ProductsScreen() {
                 </div>
               ) : error ? (
                 <div className={components.states.error}>
-                  <MessageBox variant="danger">{error}</MessageBox>
+                  <MessageBox variant="danger">{error.message || 'An error occurred'}</MessageBox>
                 </div>
               ) : products.length === 0 ? (
                 <div className={`${components.card.base} p-12 ${utils.centerText}`}>

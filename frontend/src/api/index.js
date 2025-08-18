@@ -1,8 +1,6 @@
 import axios from 'axios';
 
 // Create axios instance with backend URL
-alert(`Environment: ${import.meta.env.PROD ? 'PRODUCTION' : 'DEVELOPMENT'}\nVITE_API_URL: ${import.meta.env.VITE_API_URL}\nUsing baseURL: ${import.meta.env.PROD ? 'https://ecomstore-78h6.onrender.com' : ''}`);
-
 const api = axios.create({
   baseURL: import.meta.env.PROD ? 'https://ecomstore-78h6.onrender.com' : '',
   timeout: 10000,
