@@ -22,6 +22,7 @@ api.interceptors.request.use((config) => {
 // API endpoints
 export const productAPI = {
   getAll: (page = 1) => api.get(`api/products?page=${page}`),
+  search: (params) => api.get(`api/products/search?${new URLSearchParams(params).toString()}`),
   getBySlug: (slug) => api.get(`api/products/slug/${slug}`),
   getById: (id) => api.get(`api/products/${id}`),
   create: (data) => api.post('api/products', data),

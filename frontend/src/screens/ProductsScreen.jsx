@@ -1,6 +1,6 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { Helmet } from 'react-helmet-async';
 import { XMarkIcon, FunnelIcon } from '@heroicons/react/24/outline';
@@ -13,25 +13,7 @@ import MessageBox from '../components/MessageBox';
 import ProductCard from '../components/ProductCard';
 import { colors, components, utils } from '../styles/theme';
 
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'FETCH_REQUEST':
-      return { ...state, loading: true };
-    case 'FETCH_SUCCESS':
-      return {
-        ...state,
-        products: action.payload.products,
-        page: action.payload.page,
-        pages: action.payload.pages,
-        countProducts: action.payload.countProducts,
-        loading: false,
-      };
-    case 'FETCH_FAIL':
-      return { ...state, loading: false, error: action.payload };
-    default:
-      return state;
-  }
-};
+
 
 const prices = [
   { name: '$1 to $50', value: '1-50' },
@@ -57,34 +39,28 @@ export default function ProductsScreen() {
   const order = sp.get('order') || 'newest';
   const page = sp.get('page') || 1;
 
-  const [{ loading, error, products, pages, countProducts }, dispatch] = useReducer(reducer, {
-    loading: true,
-    error: '',
+  const {
+    data: searchData,
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ['products', 'search', { page, query, category, price, rating, order }],
+    queryFn: async () => {
+      const response = await productAPI.search({ page, query, category, price, rating, order });
+      return response.data;
+    },
+    retry: 3,
   });
+
+  const products = searchData?.products || [];
+  const pages = searchData?.pages || 1;
+  const countProducts = searchData?.countProducts || 0;
 
   const [categories, setCategories] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        dispatch({ type: 'FETCH_REQUEST' });
-        const { data } = await axios.get(
-          `/api/products/search?page=${page}&query=${query}&category=${category}&price=${price}&rating=${rating}&order=${order}`
-        );
-        dispatch({ type: 'FETCH_SUCCESS', payload: data });
-      } catch (err) {
-        dispatch({
-          type: 'FETCH_FAIL',
-          payload: err.response?.data?.message || err.message,
-        });
-      }
-    };
-    fetchData();
-  }, [category, order, page, price, query, rating]);
 
   useEffect(() => {
     const fetchCategories = async () => {
