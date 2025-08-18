@@ -1,16 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { productAPI } from '../api/index.js';
 
 export const fetchProductList = createAsyncThunk(
   'productList/fetchProducts',
   async (page = 1, { rejectWithValue }) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      const { data } = await axios.get(`/api/products/admin?page=${page}`, {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      });
+      const { data } = await productAPI.getAdmin(page);
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -22,16 +17,7 @@ export const createProduct = createAsyncThunk(
   'productList/createProduct',
   async (productData, { rejectWithValue }) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      const { data } = await axios.post(
-        '/api/products',
-        productData,
-        {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        }
-      );
+      const { data } = await productAPI.create(productData);
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -43,12 +29,7 @@ export const deleteProduct = createAsyncThunk(
   'productList/deleteProduct',
   async (productId, { rejectWithValue }) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      await axios.delete(`/api/products/${productId}`, {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      });
+      await productAPI.delete(productId);
       return productId;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

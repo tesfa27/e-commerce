@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with backend URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ,
+  baseURL: import.meta.env.VITE_API_URL || '',
   timeout: 10000,
 });
 
@@ -18,6 +18,7 @@ api.interceptors.request.use((config) => {
 // API endpoints
 export const productAPI = {
   getAll: (page = 1) => api.get(`api/products?page=${page}`),
+  getAdmin: (page = 1) => api.get(`api/products/admin?page=${page}`),
   search: (params) => api.get(`api/products/search?${new URLSearchParams(params).toString()}`),
   getBySlug: (slug) => api.get(`api/products/slug/${slug}`),
   getById: (id) => api.get(`api/products/${id}`),

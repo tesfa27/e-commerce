@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import { productAPI } from '../api/index.js';
 
 // Initialize state with cartItems from localStorage
 const initialState = {
@@ -45,7 +45,7 @@ export const addToCart = createAsyncThunk(
     const newQuantity = existItem ? existItem.quantity + quantity : quantity;
 
     try {
-      const { data } = await axios.get(`/api/products/${product._id}`);
+      const { data } = await productAPI.getById(product._id);
       console.log("API response:", data); // Debug log
       if (!data || typeof data.countInStock === "undefined") {
         return rejectWithValue("Invalid product data from server");

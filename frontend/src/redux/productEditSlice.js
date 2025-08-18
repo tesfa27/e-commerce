@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { productAPI } from '../api/index.js';
 
 export const fetchProduct = createAsyncThunk(
   'productEdit/fetchProduct',
   async (productId, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`/api/products/${productId}`);
+      const { data } = await productAPI.getById(productId);
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -17,16 +17,7 @@ export const updateProduct = createAsyncThunk(
   'productEdit/updateProduct',
   async ({ productId, productData }, { rejectWithValue }) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      const { data } = await axios.put(
-        `/api/products/${productId}`,
-        productData,
-        {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        }
-      );
+      const { data } = await productAPI.update(productId, productData);
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
