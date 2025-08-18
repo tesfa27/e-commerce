@@ -34,13 +34,21 @@ export const userAPI = {
   signup: (data) => api.post('api/users/signup', data),
   profile: () => api.get('api/users/profile'),
   updateProfile: (data) => api.put('api/users/profile', data),
+  getAll: () => api.get('api/users'),
+  getById: (id) => api.get(`api/users/${id}`),
+  update: (id, data) => api.put(`api/users/${id}`, data),
+  delete: (id) => api.delete(`api/users/${id}`),
 };
 
 export const orderAPI = {
   create: (data) => api.post('api/orders', data),
   getById: (id) => api.get(`api/orders/${id}`),
   getHistory: () => api.get('api/orders/history'),
+  getMine: () => api.get('api/orders/mine'),
+  getAll: () => api.get('api/orders'),
+  getSummary: () => api.get('api/orders/summary'),
   pay: (id, data) => api.put(`api/orders/${id}/pay`, data),
+  delete: (id) => api.delete(`api/orders/${id}`),
 };
 
 export default api;

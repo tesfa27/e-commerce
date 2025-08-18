@@ -1,16 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { userAPI } from '../api/index.js';
 
 export const fetchUserList = createAsyncThunk(
   'userList/fetchUsers',
   async (_, { rejectWithValue }) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      const { data } = await axios.get('/api/users', {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      });
+      const { data } = await userAPI.getAll();
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -22,12 +17,7 @@ export const deleteUser = createAsyncThunk(
   'userList/deleteUser',
   async (userId, { rejectWithValue }) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      await axios.delete(`/api/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      });
+      await userAPI.delete(userId);
       return userId;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

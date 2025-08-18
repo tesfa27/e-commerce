@@ -1,16 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { orderAPI } from '../api/index.js';
 
 export const fetchDashboardSummary = createAsyncThunk(
   'dashboard/fetchSummary',
   async (_, { rejectWithValue }) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      const { data } = await axios.get('/api/orders/summary', {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      });
+      const { data } = await orderAPI.getSummary();
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

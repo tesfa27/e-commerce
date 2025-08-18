@@ -1,16 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { orderAPI } from '../api/index.js';
 
 export const fetchOrderList = createAsyncThunk(
   'orderList/fetchOrders',
   async (_, { rejectWithValue }) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      const { data } = await axios.get('/api/orders', {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      });
+      const { data } = await orderAPI.getAll();
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -22,12 +17,7 @@ export const deleteOrder = createAsyncThunk(
   'orderList/deleteOrder',
   async (orderId, { rejectWithValue }) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      await axios.delete(`/api/orders/${orderId}`, {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      });
+      await orderAPI.delete(orderId);
       return orderId;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
