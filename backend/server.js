@@ -17,30 +17,12 @@ mongoose
 
 const app = express();
 
-// Explicit CORS headers
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
-
 app.use(cors({
-  origin: true,
+  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()) : ['http://localhost:3000'],
   credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Test CORS endpoint
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'CORS is working!', origin: req.headers.origin });
-});
 
 // PayPal client ID endpoint
 app.get('/api/keys/paypal', (req, res) => {
