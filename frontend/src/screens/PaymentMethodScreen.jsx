@@ -15,7 +15,7 @@ export default function PaymentMethodScreen() {
   const { paymentMethod: savedPaymentMethod } = useSelector((state) => state.cart);
   
   const [paymentMethod, setPaymentMethod] = useState(
-    savedPaymentMethod || 'PayPal'
+    savedPaymentMethod || 'Stripe'
   );
 
   useEffect(() => {
@@ -26,6 +26,7 @@ export default function PaymentMethodScreen() {
 
   const submitHandler = (e) => {
     e.preventDefault();
+    console.log('Saving payment method:', paymentMethod);
     dispatch(savePaymentMethod(paymentMethod));
     localStorage.setItem('paymentMethod', paymentMethod);
     navigate('/placeorder');
@@ -33,17 +34,17 @@ export default function PaymentMethodScreen() {
 
   const paymentOptions = [
     {
-      id: 'PayPal',
-      name: 'PayPal',
-      description: 'Pay securely with your PayPal account',
-      icon: BanknotesIcon,
-      popular: true
-    },
-    {
       id: 'Stripe',
       name: 'Credit Card',
       description: 'Pay with Visa, Mastercard, or American Express',
       icon: CreditCardIcon,
+      popular: true
+    },
+    {
+      id: 'PayPal',
+      name: 'PayPal',
+      description: 'Pay securely with your PayPal account',
+      icon: BanknotesIcon,
       popular: false
     }
   ];

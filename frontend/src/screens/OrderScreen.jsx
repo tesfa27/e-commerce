@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Helmet } from 'react-helmet-async';
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import PaymentSection from '../components/PaymentSection';
 import axios from 'axios';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
+import OrderTracking from '../components/OrderTracking';
 import { fetchOrder, payOrder, resetPay } from '../redux/orderSlice';
 import { colors, components } from '../styles/theme';
 import { 
@@ -28,6 +30,25 @@ export default function OrderScreen() {
   
   const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
   const [paypalLoaded, setPaypalLoaded] = useState(false);
+  const [stripeClientSecret, setStripeClientSecret] = useState('');
+  const [stripeError, setStripeError] = useState(null);
+
+  const loadStripeClientSecret = async () => {
+    try {
+      setStripeError(null);
+      const { data } = await axios.post('/api/stripe/create-payment-intent', {
+        orderId: orderId,
+      });
+      if (data.clientSecret) {
+        setStripeClientSecret(data.clientSecret);
+      } else {
+        setStripeError('Failed to initialize Stripe payment');
+      }
+    } catch (error) {
+      console.error('Failed to load Stripe:', error);
+      setStripeError(error.response?.data?.message || 'Failed to load Stripe payment');
+    }
+  };
 
   const loadPaypalScript = async () => {
     try {
@@ -181,39 +202,17 @@ export default function OrderScreen() {
                       {isPending ? (
                         <LoadingBox />
                       ) : (
-                        <div className="mt-4">
-                          <PayPalButtons
-                            createOrder={(data, actions) => {
-                              return actions.order.create({
-                                purchase_units: [
-                                  {
-                                    amount: {
-                                      value: orderData.totalPrice.toString(),
-                                    },
-                                  },
-                                ],
-                              });
-                            }}
-                            onApprove={(data, actions) => {
-                              return actions.order.capture().then((details) => {
-                                dispatch(
-                                  payOrder({
-                                    orderId,
-                                    paymentResult: {
-                                      id: details.id,
-                                      status: details.status,
-                                      update_time: details.update_time,
-                                      email_address: details.payer.email_address,
-                                    },
-                                  })
-                                );
-                              });
-                            }}
-                            onError={(err) => {
-                              console.error('PayPal error:', err);
-                            }}
-                          />
-                        </div>
+                                              <PaymentSection
+                        orderData={orderData}
+                        isPending={isPending}
+                        stripeError={stripeError}
+                        stripeClientSecret={stripeClientSecret}
+                        loadStripeClientSecret={loadStripeClientSecret}
+                        dispatch={dispatch}
+                        orderId={orderId}
+                        payOrder={payOrder}
+                        resetPay={resetPay}
+                      />
                       )}
                       {loadingPay && <LoadingBox />}
                     </div>
@@ -294,6 +293,11 @@ export default function OrderScreen() {
                 </div>
               </div>
             </div>
+          </div>
+          
+          {/* Order Tracking */}
+          <div className="mt-8">
+            <OrderTracking order={order} />
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Helmet } from 'react-helmet-async';
+import { toast } from 'react-toastify';
 import CheckoutSteps from '../components/CheckoutSteps';
 import { saveShippingAddress } from '../redux/cartSlice';
 import { colors, components, utils } from '../styles/theme';
@@ -22,11 +23,34 @@ const ShippingScreen = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!fullName.trim()) {
+      toast.error('Full name is required');
+      return;
+    }
+    if (!address.trim()) {
+      toast.error('Address is required');
+      return;
+    }
+    if (!city.trim()) {
+      toast.error('City is required');
+      return;
+    }
+    if (!postalCode.trim()) {
+      toast.error('Postal code is required');
+      return;
+    }
+    if (!country) {
+      toast.error('Country is required');
+      return;
+    }
+    
     dispatch(saveShippingAddress({
-      fullName,
-      address,
-      city,
-      postalCode,
+      fullName: fullName.trim(),
+      address: address.trim(),
+      city: city.trim(),
+      postalCode: postalCode.trim(),
       country,
     }));
     navigate('/payment');

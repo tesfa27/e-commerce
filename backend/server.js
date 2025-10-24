@@ -8,6 +8,7 @@ import productRouter from "./routes/productRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import uploadRouter from "./routes/uploadRoutes.js";
+import stripeRouter from "./routes/stripeRoutes.js";
 
 dotenv.config();
 console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -38,6 +39,10 @@ app.use(cors({
   credentials: true
 }));
 console.log('CORS configured to allow all origins');
+// Parse raw body for Stripe webhooks before other middleware
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+
+// Parse JSON and URL-encoded bodies for other routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -46,12 +51,18 @@ app.get('/api/keys/paypal', (req, res) => {
   res.send(process.env.PAYPAL_CLIENT_ID || 'sb');
 });
 
+// Stripe publishable key endpoint
+app.get('/api/keys/stripe', (req, res) => {
+  res.send({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
+});
+
 // Move error handler to after all routes
 app.use("/api/upload", uploadRouter);
 app.use("/api/users", userRouter);
 app.use("/api/seed", seedRouter);
 app.use("/api/products", productRouter);
 app.use("/api/orders", orderRouter);
+app.use("/api/stripe", stripeRouter);
 
 // Error handler should be last
 app.use((err, req, res, next) => {

@@ -122,7 +122,7 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrderHistory.fulfilled, (state, action) => {
         state.loadingHistory = false;
-        state.orders = action.payload;
+        state.orders = action.payload.orders || action.payload;
       })
       .addCase(fetchOrderHistory.rejected, (state, action) => {
         state.loadingHistory = false;

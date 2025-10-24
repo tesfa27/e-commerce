@@ -12,8 +12,24 @@ orderRouter.get(
   isAuth,
   isAdmin,
   expressAsyncHandler(async (req, res) => {
-    const orders = await Order.find().populate('user', 'name');
-    res.send(orders);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    
+    const orders = await Order.find()
+      .populate('user', 'name')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    const total = await Order.countDocuments();
+    
+    res.send({
+      orders,
+      page,
+      pages: Math.ceil(total / limit),
+      total
+    });
   })
 );
 
@@ -31,6 +47,15 @@ orderRouter.post(
       totalPrice: req.body.totalPrice,
       user: req.user._id,
     });
+    // Initialize tracking history
+    newOrder.orderStatus = 'confirmed';
+    newOrder.trackingHistory = [{
+      status: 'confirmed',
+      description: 'Order confirmed and payment received',
+      timestamp: new Date(),
+      location: 'Online Store'
+    }];
+    
     const order = await newOrder.save();
     res.status(201).send({ message: 'New Order Created', order });
   })
@@ -84,8 +109,23 @@ orderRouter.get(
   '/mine',
   isAuth,
   expressAsyncHandler(async (req, res) => {
-    const orders = await Order.find({ user: req.user._id });
-    res.send(orders);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    
+    const orders = await Order.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    const total = await Order.countDocuments({ user: req.user._id });
+    
+    res.send({
+      orders,
+      page,
+      pages: Math.ceil(total / limit),
+      total
+    });
   })
 );
 
@@ -150,6 +190,38 @@ orderRouter.put(
       }
       
       res.send({ message: 'Order Paid', order: updatedOrder });
+    } else {
+      res.status(404).send({ message: 'Order Not Found' });
+    }
+  })
+);
+
+orderRouter.put(
+  '/:id/status',
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const { status, description, location, trackingNumber } = req.body;
+    const order = await Order.findById(req.params.id);
+    
+    if (order) {
+      order.orderStatus = status;
+      if (trackingNumber) order.trackingNumber = trackingNumber;
+      
+      order.trackingHistory.push({
+        status,
+        description: description || `Order status updated to ${status}`,
+        timestamp: new Date(),
+        location: location || 'Warehouse'
+      });
+      
+      if (status === 'delivered') {
+        order.isDelivered = true;
+        order.deliveredAt = Date.now();
+      }
+      
+      await order.save();
+      res.send({ message: 'Order status updated', order });
     } else {
       res.status(404).send({ message: 'Order Not Found' });
     }

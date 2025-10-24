@@ -3,9 +3,9 @@ import { orderAPI } from '../api/index.js';
 
 export const fetchOrderList = createAsyncThunk(
   'orderList/fetchOrders',
-  async (_, { rejectWithValue }) => {
+  async (page = 1, { rejectWithValue }) => {
     try {
-      const { data } = await orderAPI.getAll();
+      const { data } = await orderAPI.getAll(page);
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -32,6 +32,9 @@ const orderListSlice = createSlice({
     loadingDelete: false,
     error: null,
     orders: [],
+    page: 1,
+    pages: 1,
+    total: 0,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -42,7 +45,10 @@ const orderListSlice = createSlice({
       })
       .addCase(fetchOrderList.fulfilled, (state, action) => {
         state.loading = false;
-        state.orders = action.payload;
+        state.orders = action.payload.orders || action.payload;
+        state.page = action.payload.page || 1;
+        state.pages = action.payload.pages || 1;
+        state.total = action.payload.total || 0;
       })
       .addCase(fetchOrderList.rejected, (state, action) => {
         state.loading = false;

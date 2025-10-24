@@ -17,11 +17,16 @@ import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import { fetchOrderList, deleteOrder } from '../redux/orderListSlice';
 import { colors, components, utils } from '../styles/theme';
+import Pagination from '../components/Pagination';
 
 export default function OrderListScreen() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, orders, loadingDelete } = useSelector((state) => state.orderList);
+  const { loading, error, orders, loadingDelete, page, pages } = useSelector((state) => state.orderList);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Handle paginated response
+  const ordersList = orders?.orders || orders || [];
   const { userInfo } = useSelector((state) => state.user);
   const [loadingDeliver, setLoadingDeliver] = useState(false);
 
@@ -37,8 +42,12 @@ export default function OrderListScreen() {
   };
 
   useEffect(() => {
-    dispatch(fetchOrderList());
-  }, [dispatch]);
+    dispatch(fetchOrderList(currentPage));
+  }, [dispatch, currentPage]);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
   const deliverHandler = async (order) => {
     try {
@@ -89,7 +98,7 @@ export default function OrderListScreen() {
           )}
 
           {/* Orders Table */}
-          {orders.length === 0 ? (
+          {ordersList.length === 0 ? (
             <div className={`${components.card.base} p-12 ${utils.centerText}`}>
               <ClipboardDocumentListIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No orders yet</h3>
@@ -125,7 +134,7 @@ export default function OrderListScreen() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {orders.map((order) => (
+                    {ordersList.map((order) => (
                       <tr key={order._id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
@@ -219,6 +228,11 @@ export default function OrderListScreen() {
                   </tbody>
                 </table>
               </div>
+              <Pagination 
+                currentPage={page || currentPage}
+                totalPages={pages}
+                onPageChange={handlePageChange}
+              />
             </div>
           )}
         </div>

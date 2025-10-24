@@ -33,6 +33,7 @@ import UserListScreen from './screens/UserListScreen';
 import UserEditScreen from './screens/UserEditScreen';
 import ForgetPasswordScreen from './screens/ForgetPasswordScreen';
 import ResetPasswordScreen from './screens/ResetPasswordScreen';
+import PaymentProcessingScreen from './screens/PaymentProcessingScreen';
 import Footer from './components/Footer';
 
 
@@ -147,6 +148,14 @@ const AppContent = () => {
             <Route path="/shipping" element={<ShippingScreen />} />
             <Route path="/payment" element={<PaymentMethodScreen />} />
             <Route path="/placeorder" element={<PlaceOrderScreen />} />
+            <Route 
+              path="/payment-processing" 
+              element={
+                <ProtectedRoute>
+                  <PaymentProcessingScreen />
+                </ProtectedRoute>
+              } 
+            />
             <Route
               path="/order/:id"
               element={

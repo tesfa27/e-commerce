@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import axios from 'axios';
 import { toast } from 'react-toastify';
 import CheckoutSteps from '../components/CheckoutSteps';
 import LoadingBox from '../components/LoadingBox';
@@ -32,32 +33,86 @@ export default function PlaceOrderScreen() {
       navigate('/signin');
       return;
     }
+    if (!shippingAddress?.address) {
+      navigate('/shipping');
+      return;
+    }
+    if (!paymentMethod) {
+      navigate('/payment');
+      return;
+    }
     if (success && order && order._id) {
       navigate(`/order/${order._id}`);
     }
-  }, [navigate, success, order, userInfo]);
+  }, [navigate, success, order, userInfo, shippingAddress, paymentMethod]);
 
   const placeOrderHandler = async () => {
     try {
-      const resultAction = await dispatch(createOrder({
-        orderItems: cartItems,
-        shippingAddress,
-        paymentMethod,
-        itemsPrice,
-        shippingPrice,
-        taxPrice,
-        totalPrice,
-      })).unwrap();
-      
-      if (resultAction && resultAction.order && resultAction.order._id) {
-        toast.success('Order placed successfully');
-        navigate(`/order/${resultAction.order._id}`);
-        dispatch(clearCart());
+      if (paymentMethod === 'Stripe') {
+        // For Stripe, create payment intent first, then order after successful payment
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        if (!userInfo || !userInfo.token) {
+          throw new Error('Please login first');
+        }
+
+        const response = await axios.post('/api/stripe/create-payment-intent', 
+          {
+            amount: totalPrice,
+            currency: 'usd',
+            orderData: {
+              orderItems: cartItems,
+              shippingAddress,
+              paymentMethod,
+              itemsPrice,
+              shippingPrice,
+              taxPrice,
+              totalPrice,
+            }
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${userInfo.token}`
+            }
+          }
+        );
+        
+        if (response.data.clientSecret) {
+          // Store order details in localStorage for after payment completion
+          localStorage.setItem('pendingOrderDetails', JSON.stringify({
+            orderItems: cartItems,
+            shippingAddress,
+            paymentMethod,
+            itemsPrice,
+            shippingPrice,
+            taxPrice,
+            totalPrice,
+          }));
+          
+          // Navigate to payment screen with the client secret
+          navigate(`/payment-processing?clientSecret=${response.data.clientSecret}`);
+        } else {
+          toast.error('Failed to initialize payment');
+        }
       } else {
-        toast.error('Invalid order response');
+        // For PayPal, create order directly
+        const resultAction = await dispatch(createOrder({
+          orderItems: cartItems,
+          shippingAddress,
+          paymentMethod,
+          itemsPrice,
+          shippingPrice,
+          taxPrice,
+          totalPrice,
+        })).unwrap();
+        
+        if (resultAction && resultAction.order && resultAction.order._id) {
+          navigate(`/order/${resultAction.order._id}`);
+        } else {
+          toast.error('Invalid order response');
+        }
       }
     } catch (err) {
-      toast.error(err?.message || 'Failed to place order');
+      toast.error(err?.message || 'Failed to process order');
     }
   };
 
