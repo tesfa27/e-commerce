@@ -53,7 +53,7 @@ export default function OrderListScreen() {
     try {
       setLoadingDeliver(true);
       await axios.put(
-        `/api/orders/${order._id}/deliver`,
+        `${import.meta.env.VITE_API_URL}api/orders/${order._id}/deliver`,
         {},
         {
           headers: { Authorization: `Bearer ${userInfo.token}` },
