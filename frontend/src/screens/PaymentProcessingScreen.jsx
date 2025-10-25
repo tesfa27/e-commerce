@@ -45,7 +45,7 @@ export default function PaymentProcessingScreen() {
         throw new Error('Please login first');
       }
 
-      const response = await axios.post('/api/stripe/confirm-payment', 
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}api/stripe/confirm-payment`, 
         {
           paymentIntentId: paymentIntent,
           orderData: pendingOrderDetails
@@ -92,7 +92,7 @@ export default function PaymentProcessingScreen() {
       }
 
       // Confirm payment and create order via backend
-      const response = await axios.post('/api/stripe/confirm-payment', 
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}api/stripe/confirm-payment`, 
         {
           paymentIntentId: paymentIntent.id,
           orderData: pendingOrderDetails

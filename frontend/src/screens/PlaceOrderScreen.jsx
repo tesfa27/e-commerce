@@ -55,7 +55,7 @@ export default function PlaceOrderScreen() {
           throw new Error('Please login first');
         }
 
-        const response = await axios.post('/api/stripe/create-payment-intent', 
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}api/stripe/create-payment-intent`, 
           {
             amount: totalPrice,
             currency: 'usd',
