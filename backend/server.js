@@ -39,12 +39,18 @@ app.use(cors({
   credentials: true
 }));
 console.log('CORS configured to allow all origins');
-// Parse raw body for Stripe webhooks before other middleware
-app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
-
-// Parse JSON and URL-encoded bodies for other routes
-app.use(express.json());
+// Parse JSON and URL-encoded bodies for most routes
+app.use((req, res, next) => {
+  if (req.path === '/api/stripe/webhook') {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: true }));
+
+// Parse raw body for Stripe webhooks
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 // PayPal client ID endpoint
 app.get('/api/keys/paypal', (req, res) => {
